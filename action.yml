@@ -28,9 +28,6 @@ jobs:
       - name: Install dbt
         run: pip install dbt-core dbt-postgres dbt-redshift dbt-snowflake dbt-bigquery
 
-      - name: DBT run 
-        run: dbt run --project-dir . --profiles-dir .
-
       - name: Install lightdash CLI
         run: npm install -g @lightdash/cli
 
@@ -47,6 +44,4 @@ jobs:
           LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}          
           LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}          
 
-        run: | 
-          lightdash generate --project-dir . --profiles-dir . -y
-          lightdash deploy --project-dir . --profiles-dir .
+        run: lightdash deploy --project-dir . --profiles-dir .
