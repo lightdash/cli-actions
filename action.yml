@@ -31,13 +31,6 @@ jobs:
       - name: Install lightdash CLI
         run: npm install -g @lightdash/cli
 
-      - name: Create config file 
-        env: 
-          config: ${{ secrets.CLI_CONFIG }}          
-        run:  |
-          mkdir -p $HOME/.config/lightdash
-          echo -e "$config" > $HOME/.config/lightdash/config.yaml
-
       - name: Lightdash CLI deploy 
         env:
           LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}          
