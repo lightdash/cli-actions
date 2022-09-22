@@ -16,6 +16,14 @@ jobs:
         with:
           python-version: "3.7.x"
 
+      - name: Get lightdash version 
+        uses: sergeysova/jq-action@v2
+        id: version 
+        env:
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}   
+        with: 
+          cmd: curl -s "${LIGHTDASH_URL}/api/v1/health" | jq -r '.results.version'
+
       - name: Copy profiles.yml
         env:
           config: ${{ secrets.DBT_PROFILES }}          
@@ -25,7 +33,7 @@ jobs:
         run: pip install dbt-core dbt-postgres dbt-redshift dbt-snowflake dbt-bigquery
 
       - name: Install lightdash CLI
-        run: npm install -g @lightdash/cli
+        run: npm install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || npm install -g @lightdash/cli@latest
 
       - name: Lightdash CLI deploy 
         env:
