@@ -22,8 +22,10 @@ jobs:
         run: echo -e "$config" > profiles.yml      
 
       - name: Install dbt
-        run: pip install dbt-core dbt-postgres dbt-redshift dbt-snowflake dbt-bigquery
-
+        run: |
+          pip install dbt-core dbt-postgres dbt-redshift dbt-snowflake dbt-bigquery
+          dbt --project-dir . deps
+          
       - name: Install lightdash CLI
         run: npm install -g @lightdash/cli
 
