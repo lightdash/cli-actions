@@ -16,6 +16,16 @@ jobs:
         with:
           python-version: "3.7.x"
 
+      - name: Copy Google credentials file
+        env: 
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        if: "${{ env.GOOGLE_CREDENTIALS != '' }}"
+        id: create-json
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "googlecredentials.json"
+          json: ${{ env.GOOGLE_CREDENTIALS }}
+
       - name: Get lightdash version 
         uses: sergeysova/jq-action@v2
         id: version 
@@ -41,6 +51,7 @@ jobs:
         env:
           LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}          
           LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}          
-          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}          
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}      
+          GOOGLE_APPLICATION_CREDENTIALS: './googlecredentials.json'    
 
         run: lightdash deploy --project-dir . --profiles-dir . --profile prod || lightdash deploy --project-dir . --profiles-dir .
