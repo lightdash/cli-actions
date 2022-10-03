@@ -29,6 +29,9 @@ jobs:
       - name: Move credentials to /tmp 
         run: mv googlecredentials.json /tmp || true
 
+      - name: Locate dbt_project.yml
+        run: echo "PROJECT_DIR=$(find . -name "dbt_project.yml"  | sed  's/dbt_project.yml//g')" >> $GITHUB_ENV
+
       - name: Get lightdash version 
         uses: sergeysova/jq-action@v2
         id: version 
@@ -45,7 +48,7 @@ jobs:
       - name: Install dbt
         run: |
           pip install dbt-core dbt-postgres dbt-redshift dbt-snowflake dbt-bigquery
-          dbt deps --project-dir . 
+          dbt deps --project-dir "$PROJECT_DIR"
 
       - name: Install lightdash CLI
         run: npm install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || npm install -g @lightdash/cli@latest
@@ -57,4 +60,4 @@ jobs:
           LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}      
           GOOGLE_APPLICATION_CREDENTIALS: '/tmp/googlecredentials.json'    
 
-        run: lightdash deploy --project-dir . --profiles-dir . --profile prod || lightdash deploy --project-dir . --profiles-dir .
+        run: lightdash deploy --project-dir "$PROJECT_DIR" --profiles-dir . --profile prod || lightdash deploy --project-dir "$PROJECT_DIR" --profiles-dir .
