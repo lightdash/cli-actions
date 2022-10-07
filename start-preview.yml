@@ -52,7 +52,8 @@ jobs:
       - name: Install lightdash CLI
         run: npm install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || npm install -g @lightdash/cli@latest
 
-      - name: Lightdash CLI start preview 
+      - name: Lightdash CLI start preview
+        id: start-preview
         env:
           LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}          
           LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}          
@@ -60,3 +61,13 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: '/tmp/googlecredentials.json'
 
         run:  lightdash start-preview --project-dir "$PROJECT_DIR" --profiles-dir . --name ${GITHUB_REF##*/}
+
+      - uses: jwalton/gh-find-current-pr@v1
+        id: finder
+        
+      - name: Leave a comment after deployment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ steps.finder.outputs.pr }}
+          message: |
+            :rocket: Deployed ${{ github.sha }} to ${{ steps.start-preview.outputs.url }}
