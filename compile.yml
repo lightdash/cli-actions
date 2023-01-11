@@ -3,7 +3,7 @@ name: compile-lightdash
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches-ignore: [ "main", "master" ]
 
 jobs:
   compile:
