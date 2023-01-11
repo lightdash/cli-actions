@@ -1,20 +1,17 @@
 # Lightdash GitHub Actions templates
 
-## Refresh your Lightdash project
-> refresh.yml
-
-Follow the [Lightdash documentation](https://docs.lightdash.com/references/syncing_your_dbt_changes) to know how you can
-add this Github action to your DBT Github repo to automatically refresh your DBT changes into Lightdash.
-This action is only available if
-you [configured your Lightdash project to be connected to Github](https://docs.lightdash.com/get-started/setup-lightdash/get-project-lightdash-ready#next-steps-update-your-project-connection-settings)
-, otherwise you can use the `deploy` option bellow.
-
 ## Deploy your Lightdash project
 > deploy.yml
 
 Follow the [Lightdash documentation](https://docs.lightdash.com/references/syncing_your_dbt_changes) to know how you can
 add this Github action to your DBT Github repo to
 automatically deploy your DBT changes into Lightdash.
+
+## Refresh your Lightdash project
+> refresh.yml
+
+Alternative to `deploy.yml`. 
+The main difference is that it uses the credentials saved in your Lightdash project.
 
 ## Create a preview Lightdash project on each pull request
 > start-preview.yml
