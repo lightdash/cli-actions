@@ -3,7 +3,9 @@ name: compile-lightdash
 
 on:
   push:
-    branches-ignore: [ "main", "master" ]
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
 
 jobs:
   compile:
