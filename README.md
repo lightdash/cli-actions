@@ -13,6 +13,11 @@ automatically deploy your DBT changes into Lightdash.
 Alternative to `deploy.yml`. 
 The main difference is that it uses the credentials saved in your Lightdash project.
 
+## Compile your dbt project
+> compile.yml
+
+Succeeds if your dbt project compiles correctly.
+
 ## Create a preview Lightdash project on each pull request
 > start-preview.yml
 > stop-preview.yml
