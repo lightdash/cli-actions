@@ -11,7 +11,9 @@ env:
 jobs:
   preview:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3.4.1
