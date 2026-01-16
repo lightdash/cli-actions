@@ -18,6 +18,14 @@ The main difference is that it uses the credentials saved in your Lightdash proj
 
 Succeeds if your dbt project compiles correctly.
 
+## Validate your Lightdash project
+> lightdash-validate.yml
+
+Validates that your changes don't break any charts or dashboards in your Lightdash project.
+This is useful for demos and helps catch issues before deployment.
+
+Follow the [Lightdash documentation](https://docs.lightdash.com/guides/cli/how-to-use-lightdash-validate) to learn more about the validate command.
+
 ## Create a preview Lightdash project on each pull request
 > start-preview.yml
 > stop-preview.yml
