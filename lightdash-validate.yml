@@ -1,5 +1,4 @@
-
-name: compile-lightdash
+name: validate-lightdash
 
 on:
   push:
@@ -8,11 +7,14 @@ on:
     branches: [ "main", "master" ]
 
 env:
-  DBT_VERSION: "1.7.10"
+  DBT_VERSION: "1.9.0"
 
 jobs:
-  compile:
+  validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v3
@@ -58,11 +60,42 @@ jobs:
       - name: Install lightdash CLI
         run: npm install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || npm install -g @lightdash/cli@latest
 
-      - name: Lightdash CLI compile
+      - name: Lightdash validate
+        id: validate
         env:
           LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
           LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
           LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
           GOOGLE_APPLICATION_CREDENTIALS: '/tmp/googlecredentials.json'
+        continue-on-error: true
+        run: |
+          set +e
+          OUTPUT=$(lightdash validate --project-dir "$PROJECT_DIR" --profiles-dir . --profile prod 2>&1)
+          if [ $? -ne 0 ]; then
+            OUTPUT=$(lightdash validate --project-dir "$PROJECT_DIR" --profiles-dir . 2>&1) || true
+          fi
+          set -e
+          # Filter to show only from "Validating" onwards
+          FILTERED_OUTPUT=$(echo "$OUTPUT" | sed -n '/Validating/,$p')
+          echo "$FILTERED_OUTPUT"
+          echo "validation_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILTERED_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-        run: lightdash compile --project-dir "$PROJECT_DIR" --profiles-dir . --profile prod || lightdash compile --project-dir "$PROJECT_DIR" --profiles-dir .
+      - uses: jwalton/gh-find-current-pr@v1
+        id: finder
+
+      - name: Comment validation results on PR
+        if: steps.finder.outputs.pr != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ steps.finder.outputs.pr }}
+          header: lightdash-validate
+          message: |
+            ## Lightdash Validation Results
+
+            ```
+            ${{ steps.validate.outputs.validation_output }}
+            ```
+
+            > This validation check is informational and does not block merging.
