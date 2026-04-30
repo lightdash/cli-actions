@@ -1,0 +1,106 @@
+name: install-skills
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  workflow_dispatch:
+    inputs:
+      skill_source:
+        description: 'Skill source: project, user, or global'
+        required: false
+        default: 'project'
+        type: choice
+        options:
+          - project
+          - user
+          - global
+
+env:
+  PROJECT_SKILLS_DIR: ".cortex/skills/"
+  USER_SKILLS_DIR: "~/.snowflake/cortex/skills"
+  GLOBAL_SKILLS_DIR: "~/.snowflake/cortex/skills/"
+
+jobs:
+  install-skills:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3.4.1
+
+      - name: Get lightdash version
+        uses: sergeysova/jq-action@v2
+        id: version
+        env:
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
+        with:
+          cmd: curl -s "${LIGHTDASH_URL}/api/v1/health" | jq -r '.results.version'
+
+      - name: Install lightdash CLI
+        run: npm install -g "@lightdash/cli@${{ steps.version.outputs.value }}" || npm install -g @lightdash/cli@latest
+
+      - name: Create Snowflake Cortex skill directories
+        run: |
+          mkdir -p ${{ env.PROJECT_SKILLS_DIR }}
+          mkdir -p $HOME/.snowflake/cortex/skills
+
+      - name: Detect skill source
+        id: skill-source
+        run: |
+          SKILL_SOURCE="${{ github.event.inputs.skill_source || 'project' }}"
+
+          case "$SKILL_SOURCE" in
+            project)
+              SKILLS_PATH="${{ env.PROJECT_SKILLS_DIR }}"
+              ;;
+            user)
+              SKILLS_PATH="$HOME/.snowflake/cortex/skills"
+              ;;
+            global)
+              SKILLS_PATH="$HOME/.snowflake/cortex/skills/"
+              ;;
+            *)
+              SKILLS_PATH="${{ env.PROJECT_SKILLS_DIR }}"
+              ;;
+          esac
+
+          echo "skills_path=$SKILLS_PATH" >> $GITHUB_OUTPUT
+          echo "skill_source=$SKILL_SOURCE" >> $GITHUB_OUTPUT
+
+      - name: Check for project skills
+        id: check-project-skills
+        run: |
+          if [ -d "${{ env.PROJECT_SKILLS_DIR }}" ] && [ "$(ls -A ${{ env.PROJECT_SKILLS_DIR }} 2>/dev/null)" ]; then
+            echo "has_project_skills=true" >> $GITHUB_OUTPUT
+            echo "Found project skills in ${{ env.PROJECT_SKILLS_DIR }}"
+          else
+            echo "has_project_skills=false" >> $GITHUB_OUTPUT
+            echo "No project skills found in ${{ env.PROJECT_SKILLS_DIR }}"
+          fi
+
+      - name: Install Snowflake Cortex skills
+        env:
+          LIGHTDASH_API_KEY: ${{ secrets.LIGHTDASH_API_KEY }}
+          LIGHTDASH_PROJECT: ${{ secrets.LIGHTDASH_PROJECT }}
+          LIGHTDASH_URL: ${{ secrets.LIGHTDASH_URL }}
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+        run: |
+          SKILLS_PATH="${{ steps.skill-source.outputs.skills_path }}"
+          SKILL_SOURCE="${{ steps.skill-source.outputs.skill_source }}"
+
+          echo "Installing skills from $SKILL_SOURCE source: $SKILLS_PATH"
+
+          if [ -d "$SKILLS_PATH" ] && [ "$(ls -A $SKILLS_PATH 2>/dev/null)" ]; then
+            lightdash install-skills --source "$SKILL_SOURCE" --skills-dir "$SKILLS_PATH"
+          else
+            echo "No skills found in $SKILLS_PATH, skipping installation"
+          fi
