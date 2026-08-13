@@ -1,0 +1,17 @@
+name: Lint workflow templates
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint root-level workflow templates
+        uses: docker://rhysd/actionlint:1.7.12
+        with:
+          args: compile.yml deploy.yml start-preview.yml close-preview.yml refresh.yml lightdash-validate.yml

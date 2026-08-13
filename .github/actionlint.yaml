@@ -1,0 +1,9 @@
+paths:
+  # Accepted style advisories in existing templates.
+  "{compile,deploy,start-preview,close-preview,refresh,lightdash-validate}.yml":
+    ignore:
+      - "shellcheck reported issue"
+  # Genuine validity error tracked in PROD-10126; remove when that ticket is fixed.
+  close-preview.yml:
+    ignore:
+      - "invalid activity type \"merged\""

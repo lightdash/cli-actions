@@ -1,0 +1,9 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "github-actions": {
+    "managerFilePatterns": [
+      "/^(?:compile|deploy|start-preview|close-preview|refresh|lightdash-validate)\\.yml$/"
+    ]
+  }
+}
