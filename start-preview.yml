@@ -15,11 +15,11 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3.4.1
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '24'
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10.x"
 
@@ -28,7 +28,7 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         if: "${{ env.GOOGLE_CREDENTIALS != '' }}"
         id: create-json
-        uses: jsdaniell/create-json@1.1.2
+        uses: jsdaniell/create-json@v1.2.3
         with:
           name: "googlecredentials.json"
           json: ${{ env.GOOGLE_CREDENTIALS }}
@@ -73,7 +73,7 @@ jobs:
         id: finder
         
       - name: Leave a comment after deployment
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           number: ${{ steps.finder.outputs.pr }}
           message: |
